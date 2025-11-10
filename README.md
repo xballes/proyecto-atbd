@@ -5,7 +5,7 @@
 Este proyecto forma parte de la asignatura **Arquitecturas y Tecnologías Big Data (ATBD)** del Máster en Big Data.  
 El objetivo es desplegar un **clúster Hadoop + YARN + Spark** sobre Docker y realizar un análisis distribuido del dataset:
 
-> [Electric Vehicle Population Data – Kaggle](https://www.kaggle.com/datasets/adarshsng/electric-vehicle-population-data)
+> [Electric Vehicle Population Data – Kaggle](https://www.kaggle.com/datasets/ratikkakkar/electric-vehicle-population-data/code)
 
 El análisis se centra en la **adopción de vehículos eléctricos (EV)** en EE. UU., estudiando su evolución, marcas líderes y características técnicas.
 
