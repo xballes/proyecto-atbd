@@ -1,0 +1,74 @@
+services:
+  master:
+    build: .
+    container_name: master
+    hostname: master
+    environment:
+      NODE_ROLE: master
+    ports:
+      - "9870:9870"   # HDFS NameNode UI
+      - "8088:8088"   # YARN ResourceManager UI
+      - "19888:19888" # HistoryServer UI
+    networks:
+      - hadoop_net
+    volumes:
+      - hdfs_namenode:/data/hdfs/namenode
+
+  worker1:
+    build: .
+    container_name: worker1
+    hostname: worker1
+    environment:
+      NODE_ROLE: worker
+    networks:
+      - hadoop_net
+    volumes:
+      - hdfs_datanode1:/data/hdfs/datanode
+
+  worker2:
+    build: .
+    container_name: worker2
+    hostname: worker2
+    environment:
+      NODE_ROLE: worker
+    networks:
+      - hadoop_net
+    volumes:
+      - hdfs_datanode2:/data/hdfs/datanode
+
+  worker3:
+    build: .
+    container_name: worker3
+    hostname: worker3
+    environment:
+      NODE_ROLE: worker
+    networks:
+      - hadoop_net
+    volumes:
+      - hdfs_datanode3:/data/hdfs/datanode
+
+  client:
+    build: .
+    container_name: client
+    hostname: client
+    environment:
+      NODE_ROLE: client
+    networks:
+      - hadoop_net
+    volumes:
+      - ./ev_project:/home/hadoop/ev_project #codigo spark
+    depends_on:
+      - master
+      - worker1
+      - worker2
+      - worker3
+
+networks:
+  hadoop_net:
+    driver: bridge
+
+volumes:
+  hdfs_namenode:
+  hdfs_datanode1:
+  hdfs_datanode2:
+  hdfs_datanode3:
