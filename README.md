@@ -94,6 +94,51 @@ Nota: El modo client es el que finaliza correctamente en este entorno Docker deb
 - **client mode** funciona correctamente.  
 - **cluster mode** falla con *Exit code 137* porque el ApplicationMaster (Driver en cluster mode) se queda sin memoria dentro del contenedor YARN.
 
+### Ejecución alternativa en *cluster mode* (memoria ajustada)
+
+Para poder ejecutar el job también en **cluster mode** dentro de este entorno Docker (con recursos limitados), se puede reducir explícitamente la memoria solicitada por el driver y los ejecutores:
+
+```bash
+cd /home/hadoop/ev_project
+
+spark-submit \
+  --master yarn \
+  --deploy-mode cluster \
+  --num-executors 1 \
+  --executor-cores 1 \
+  --executor-memory 512m \
+  --driver-memory 512m \
+  --conf spark.executor.memoryOverhead=256 \
+  analiticas_ev.py
+```
+
+### Acceso a los resultados generados
+
+Cada consulta del script se guarda automáticamente en formato Parquet dentro de HDFS, en:
+
+```bash
+/results/ev/
+```
+### Listar los directorios de resultados
+```bash
+hdfs dfs -ls /results/ev
+```
+
+### Ejemplo de salida:
+```bash
+/results/ev/dataset_limpio
+/results/ev/q1_marcas_estado_anio
+/results/ev/q2_bev_vs_phev
+/results/ev/q3_autonomia_vs_anio
+/results/ev/q4_condados_top
+...
+```
+
+### Ver el contenido de un resultado concreto
+
+```bash
+hdfs dfs -ls /results/ev/q1_marcas_estado_anio
+```
 
 ### Resultados
 ```bash
