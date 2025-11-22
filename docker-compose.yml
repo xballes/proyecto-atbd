@@ -1,6 +1,7 @@
 services:
   master:
     build: .
+    image: xballes/proyecto-atbd:latest #para probar en local quitar esta linea
     container_name: master
     hostname: master
     environment:
@@ -16,6 +17,7 @@ services:
 
   worker1:
     build: .
+    image: xballes/proyecto-atbd:latest #para probar en local quitar esta linea
     container_name: worker1
     hostname: worker1
     environment:
@@ -27,6 +29,7 @@ services:
 
   worker2:
     build: .
+    image: xballes/proyecto-atbd:latest #para probar en local quitar esta linea
     container_name: worker2
     hostname: worker2
     environment:
@@ -38,6 +41,7 @@ services:
 
   worker3:
     build: .
+    image: xballes/proyecto-atbd:latest #para probar en local quitar esta linea
     container_name: worker3
     hostname: worker3
     environment:
@@ -49,6 +53,7 @@ services:
 
   client:
     build: .
+    image: xballes/proyecto-atbd:latest #para probar en local quitar esta linea
     container_name: client
     hostname: client
     environment:
