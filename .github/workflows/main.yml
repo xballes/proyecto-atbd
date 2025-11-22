@@ -3,6 +3,9 @@ name: Docker Compose CI
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-and-up:
     runs-on: ubuntu-latest
@@ -38,6 +41,46 @@ jobs:
             --master yarn \
             --deploy-mode cluster \
             analiticas_ev.py"
+
+      - name: Get Cluster Stats and Logs
+        run: |
+          docker exec client bash -c "
+            echo '=== YARN Node List ===' > /home/hadoop/results/cluster_report.txt
+            yarn node -list -all >> /home/hadoop/results/cluster_report.txt
+            
+            echo -e '\n=== YARN Applications ===' >> /home/hadoop/results/cluster_report.txt
+            yarn application -list -appStates FINISHED >> /home/hadoop/results/cluster_report.txt
+            
+            # Get the last application ID
+            APP_ID=\$(yarn application -list -appStates FINISHED | awk '/application_/ {print \$1}' | tail -n 1)
+            
+            if [ -n \"\$APP_ID\" ]; then
+              echo -e \"\n=== Status for \$APP_ID ===\" >> /home/hadoop/results/cluster_report.txt
+              yarn application -status \$APP_ID >> /home/hadoop/results/cluster_report.txt
+              
+              echo -e \"\n=== Logs for \$APP_ID ===\" >> /home/hadoop/results/cluster_report.txt
+              yarn logs -applicationId \$APP_ID >> /home/hadoop/results/cluster_report.txt 2>&1 || echo 'Logs not available (aggregation might be disabled)' >> /home/hadoop/results/cluster_report.txt
+            else
+              echo -e \"\nNo finished applications found.\" >> /home/hadoop/results/cluster_report.txt
+            fi
+          "
+
+      - name: Extract results from HDFS
+        run: |
+          docker exec client hdfs dfs -get /results/ev /home/hadoop/results
+
+      - name: Copy results to host
+        run: |
+          mkdir -p results
+          docker cp client:/home/hadoop/results ./results
+
+      - name: Commit and push results
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add results/
+          git commit -m "Add analysis results" || echo "No changes to commit"
+          git push
 
       - name: Stop services
         if: always()
