@@ -46,6 +46,7 @@ docker compose up -d
 Carga del dataset en HDFS
 1. Copiar el CSV al contenedor client
 ```bash
+cd .\ev_project\
 docker cp Electric_Vehicle_Population_Data.csv client:/home/hadoop/
 ```
 3. Entrar en el contenedor
