@@ -143,6 +143,7 @@ hdfs dfs -ls /results/ev/q1_marcas_estado_anio
 
 ### Copiar resultados
 ```bash
+docker exec client hdfs dfs -get /results/ev /home/hadoop/results
 docker cp client:/home/hadoop/results ./results
 ```
 
