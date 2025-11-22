@@ -45,6 +45,7 @@ jobs:
       - name: Get Cluster Stats and Logs
         run: |
           docker exec client bash -c "
+            mkdir -p /home/hadoop/results
             echo '=== YARN Node List ===' > /home/hadoop/results/cluster_report.txt
             yarn node -list -all >> /home/hadoop/results/cluster_report.txt
             
