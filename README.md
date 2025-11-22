@@ -141,6 +141,11 @@ hdfs dfs -ls /results/ev
 hdfs dfs -ls /results/ev/q1_marcas_estado_anio
 ```
 
+### Copiar resultados
+```bash
+docker cp client:/home/hadoop/results ./results
+```
+
 ### Resultados
 ```bash
 --- Q1: Marcas líderes por estado y año ---
