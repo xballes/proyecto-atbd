@@ -52,6 +52,34 @@ def main():
         total = df.count()
         print("Registros totales:", total, flush=True)
 
+        # ============================================================
+        # filtrar años con pocos registros
+        # ============================================================
+        MIN_REG_POR_ANIO = 500
+
+        registros_por_anio = (
+            df.groupBy("model_year")
+              .agg(count("*").alias("n_registros"))
+              .orderBy("model_year")
+        )
+
+        print("\n--- Registros por año ---", flush=True)
+        registros_por_anio.show(100, truncate=False)
+
+        anios_validos = (
+            registros_por_anio
+            .where(col("n_registros") >= MIN_REG_POR_ANIO)
+            .select("model_year")
+        )
+
+        print(f"\nAños válidos (>= {MIN_REG_POR_ANIO} registros):", flush=True)
+        anios_validos.show(100, truncate=False)
+
+        # df_filtrado SOLO contiene años con suficientes datos
+        df_filtrado = df.join(anios_validos, on="model_year", how="inner").cache()
+        print("\nRegistros tras filtrar años con pocos datos:", df_filtrado.count(), flush=True)
+        # ============================================================
+
     except Exception as e:
         print("\n*** ERROR leyendo o preparando el DataFrame ***", flush=True)
         print(repr(e), flush=True)
@@ -67,15 +95,16 @@ def main():
         print("\n*** ERROR guardando dataset_limpio ***", flush=True)
         print(repr(e), flush=True)
 
-    # A partir de aquí, cada consulta va en su propio try/except para que
-    # si una falla, se vea el error pero las anteriores se hayan ejecutado.
+    # A partir de aquí:
+    # - consultas que NO van por año usan df
+    # - consultas por año usan df_filtrado
 
     # ============================================================
-    # 1) Marcas líderes por estado y año
+    # 1) Marcas líderes por estado y año  (usa df_filtrado)
     # ============================================================
     try:
         q1 = (
-            df.groupBy("state", "model_year", "make")
+            df_filtrado.groupBy("state", "model_year", "make")
               .agg(count("*").alias("num_vehiculos"))
               .orderBy("state", "model_year", desc("num_vehiculos"))
         )
@@ -87,11 +116,11 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 2) Evolución anual BEV vs PHEV
+    # 2) Evolución anual BEV vs PHEV  (usa df_filtrado)
     # ============================================================
     try:
         q2 = (
-            df.groupBy("model_year", "ev_type")
+            df_filtrado.groupBy("model_year", "ev_type")
               .agg(count("*").alias("num_vehiculos"))
               .orderBy("model_year", "ev_type")
         )
@@ -103,11 +132,11 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 3) Autonomía media por año
+    # 3) Autonomía media por año  (usa df_filtrado)
     # ============================================================
     try:
         q3 = (
-            df.groupBy("model_year")
+            df_filtrado.groupBy("model_year")
               .agg(avg("electric_range").alias("autonomia_media"))
               .orderBy("model_year")
         )
@@ -119,7 +148,7 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 4) Condados con más EV
+    # 4) Condados con más EV  (no depende de año -> df)
     # ============================================================
     try:
         q4 = (
@@ -135,11 +164,11 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 5) Precio medio por marca y año
+    # 5) Precio medio por marca y año  (usa df_filtrado)
     # ============================================================
     try:
         q5 = (
-            df.where(col("base_msrp").isNotNull())
+            df_filtrado.where(col("base_msrp").isNotNull())
               .groupBy("model_year", "make")
               .agg(avg("base_msrp").alias("precio_medio"))
               .orderBy("model_year", "make")
@@ -152,7 +181,7 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 6) Autonomía media por elegibilidad CAFV
+    # 6) Autonomía media por elegibilidad CAFV  (no por año -> df)
     # ============================================================
     try:
         q6 = (
@@ -169,7 +198,7 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 7) Modelos por compañía eléctrica
+    # 7) Modelos por compañía eléctrica  (no por año -> df)
     # ============================================================
     try:
         q7 = (
@@ -185,7 +214,7 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 8) EV por distrito legislativo
+    # 8) EV por distrito legislativo  (no por año -> df)
     # ============================================================
     try:
         q8 = (
@@ -202,12 +231,13 @@ def main():
 
     # ============================================================
     # 9) Marcas con mayor autonomía media en los últimos 5 años
+    #    (usa df_filtrado para evitar años raros)
     # ============================================================
     try:
-        max_year = df.agg(Fmax("model_year").alias("max_year")).collect()[0]["max_year"]
+        max_year = df_filtrado.agg(Fmax("model_year").alias("max_year")).collect()[0]["max_year"]
         if max_year is not None:
             last_year = max_year - 4  # últimos 5 años
-            df_last = df.where(col("model_year") >= last_year)
+            df_last = df_filtrado.where(col("model_year") >= last_year)
             q9 = (
                 df_last.groupBy("make")
                        .agg(avg("electric_range").alias("autonomia_media"))
@@ -223,10 +253,10 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 10) Proporción de CAFV por año
+    # 10) Proporción de CAFV por año  (usa df_filtrado)
     # ============================================================
     try:
-        df_cafv = df.withColumn(
+        df_cafv = df_filtrado.withColumn(
             "es_cafv",
             when(col("cafv_eligibility").contains("Eligible"), 1).otherwise(0)
         )
@@ -240,7 +270,7 @@ def main():
                    .withColumn("proporcion_cafv", col("total_cafv") / col("total"))
                    .orderBy("model_year")
         )
-        print("\n--- Q10: Proporción de CAFV por año ---", flush=True)
+        print("\n--- Q10: Proporción de CAFV por año (años filtrados) ---", flush=True)
         q10.show(20, truncate=False)
         q10.write.mode("overwrite").parquet(f"{base_out}/q10_proporcion_cafv_anio")
     except Exception as e:
