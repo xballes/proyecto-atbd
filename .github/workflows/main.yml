@@ -35,6 +35,10 @@ jobs:
       - name: Upload dataset to HDFS
         run: docker exec client hdfs dfs -put -f /home/hadoop/Electric_Vehicle_Population_Data.csv /data/ev/
 
+      - name: Clean previous HDFS results 
+        run: |
+          docker exec client hdfs dfs -rm -r -skipTrash /results/ev || echo "HDFS results directory not found, skipping removal."
+
       - name: Run Spark Analysis
         run: |
           docker exec client bash -c "cd /home/hadoop/ev_project && spark-submit \
@@ -69,6 +73,10 @@ jobs:
       - name: Extract results from HDFS
         run: |
           docker exec client hdfs dfs -get /results/ev /home/hadoop/results
+
+      - name: Clean previous results
+        run: |
+          rm -rf results
 
       - name: Copy results to host
         run: |
