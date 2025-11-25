@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 sns.set_theme(style="whitegrid")
 plt.rcParams.update({'figure.max_open_warning': 0})
 
-BASE_DIR = "../results/results/ev"
-OUTPUT_DIR = "results/plots"
+BASE_DIR = "../results/ev"
+OUTPUT_DIR = "../results/plots"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
