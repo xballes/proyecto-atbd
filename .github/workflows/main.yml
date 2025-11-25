@@ -79,6 +79,16 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install visualization dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas seaborn matplotlib plotly pyarrow
+
+      - name: Run visualization script
+        run: |
+          cd ev_project
+          python visualizacion.py
+
       - name: Commit and push results
         run: |
           git config --global user.name "GitHub Actions"
