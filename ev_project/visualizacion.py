@@ -2,13 +2,14 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from typing import Optional 
 
 # Configuración de estilo
 sns.set_theme(style="whitegrid")
 plt.rcParams.update({'figure.max_open_warning': 0})
 
-BASE_DIR = "../results/results/ev"
-OUTPUT_DIR = "results/plots"
+BASE_DIR = "../results/ev"
+OUTPUT_DIR = "../results/plots"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -17,7 +18,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # Helpers
 # ===========================
 
-def load_parquet(name: str) -> pd.DataFrame | None:
+def load_parquet(name: str) -> Optional[pd.DataFrame]:
     """Carga un parquet desde BASE_DIR/name."""
     path = os.path.join(BASE_DIR, name)
     if not os.path.exists(path):
@@ -162,10 +163,9 @@ def plot_q2():
 # ===========================
 
 def plot_q3():
-    df = load_parquet("q3_autonomia_vs_anio")
+    df = load_parquet("q3_autonomia_vs_anio_v2")
     if df is None or df.empty:
         return
-    print(df)
     plt.figure(figsize=(14, 7))
 
     # Líneas separadas por tipo de vehículo eléctrico
@@ -191,7 +191,7 @@ def plot_q3():
         frameon=True,
     )
 
-    save_plot("q3_autonomia_vs_anio.png")
+    save_plot("q3_autonomia_vs_anio_v2.png")
 
 # ===========================
 # Q4
@@ -286,14 +286,14 @@ def plot_q7():
         df.groupby("electric_utility")["num_vehiculos"]
         .sum()
         .sort_values(ascending=False)
-        .head(5)
+        .head(10)
         .index
     )
     df_filtered = df[df["electric_utility"].isin(top_utilities)]
 
     df_final = (
         df_filtered.groupby("electric_utility")
-        .apply(lambda x: x.nlargest(5, "num_vehiculos"))
+        .apply(lambda x: x.nlargest(10, "num_vehiculos"))
         .reset_index(drop=True)
     )
 
@@ -423,7 +423,6 @@ def main():
     plot_q4()
     plot_q5()
     plot_q6()
-    plot_q7()
     plot_q8()
     plot_q9()
     plot_q10()
