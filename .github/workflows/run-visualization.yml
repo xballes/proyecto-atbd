@@ -1,0 +1,59 @@
+name: Run visualization and save plots
+
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch: {}
+
+jobs:
+  visualize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies if present
+        run: |
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt, skipping dependency installation"
+          fi
+
+      - name: Create results directory
+        run: mkdir -p results/plots
+
+      - name: Run visualization script (try common locations)
+        env:
+          VISUALIZATION_OUTPUT: results/plots
+        run: |
+          # prefer scripts/* names first
+          if [ -f scripts/visualize.py ]; then
+            python scripts/visualize.py --output-dir results/plots || python scripts/visualize.py
+          elif [ -f scripts/visualization.py ]; then
+            python scripts/visualization.py --output-dir results/plots || python scripts/visualization.py
+          elif [ -f scripts/plot.py ]; then
+            python scripts/plot.py --output-dir results/plots || python scripts/plot.py
+          elif [ -f visualization.py ]; then
+            python visualization.py --output-dir results/plots || python visualization.py
+          elif [ -f visualize.py ]; then
+            python visualize.py --output-dir results/plots || python visualize.py
+          elif [ -f plot.py ]; then
+            python plot.py --output-dir results/plots || python plot.py
+          else
+            echo "No visualization script found in common locations; nothing to run"
+          fi
+
+      - name: Upload plots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visualization-plots
+          path: results/plots
