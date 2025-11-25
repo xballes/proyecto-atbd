@@ -163,7 +163,7 @@ def plot_q2():
 # ===========================
 
 def plot_q3():
-    df = load_parquet("q3_autonomia_vs_anio_v2")
+    df = load_parquet("q3_autonomia_vs_anio")
     if df is None or df.empty:
         return
     plt.figure(figsize=(14, 7))
@@ -191,7 +191,7 @@ def plot_q3():
         frameon=True,
     )
 
-    save_plot("q3_autonomia_vs_anio_v2.png")
+    save_plot("q3_autonomia_vs_anio.png")
 
 # ===========================
 # Q4
@@ -281,41 +281,76 @@ def plot_q7():
     if df is None or df.empty:
         return
 
-    # Mostramos las top 5 utilities y dentro de cada una, sus 5 modelos con más vehículos
+    # -----------------------------------------------------------
+    # (A) Top Modelos por Utility (Top 5 Utilities)
+    # -----------------------------------------------------------
     top_utilities = (
         df.groupby("electric_utility")["num_vehiculos"]
         .sum()
         .sort_values(ascending=False)
-        .head(10)
+        .head(5)
         .index
     )
-    df_filtered = df[df["electric_utility"].isin(top_utilities)]
+    df_util = df[df["electric_utility"].isin(top_utilities)]
 
-    df_final = (
-        df_filtered.groupby("electric_utility")
-        .apply(lambda x: x.nlargest(10, "num_vehiculos"))
+    # Top 5 modelos por cada una de esas utilities
+    df_util_final = (
+        df_util.groupby("electric_utility")
+        .apply(lambda x: x.nlargest(5, "num_vehiculos"))
         .reset_index(drop=True)
     )
 
     plt.figure(figsize=(14, 8))
-
-    # Acortamos nombres largos de utility para la leyenda
-    df_final["utility_short"] = df_final["electric_utility"].apply(
-        lambda x: x[:50] + "..." if len(x) > 50 else x
+    # Acortamos nombres largos
+    df_util_final["utility_short"] = df_util_final["electric_utility"].apply(
+        lambda x: x[:40] + "..." if len(x) > 40 else x
     )
 
     sns.barplot(
-        data=df_final,
+        data=df_util_final,
         x="num_vehiculos",
         y="model",
         hue="utility_short",
         dodge=False,
     )
-    plt.title("Modelos destacados por Compañía Eléctrica (Top 5 Utilities)")
+    plt.title("Top Modelos por Compañía Eléctrica (Top 5 Utilities)")
     plt.xlabel("Nº Vehículos")
     plt.ylabel("Modelo")
     plt.legend(title="Utility", bbox_to_anchor=(1.05, 1), loc="upper left")
     save_plot("q7_modelos_utility.png")
+
+    # -----------------------------------------------------------
+    # (B) Top Modelos por Tipo de Carga (BEV vs PHEV)
+    # -----------------------------------------------------------
+    # Agrupamos por ev_type y modelo para ver los más populares globalmente por tipo
+    # (Opcional: si se quisiera por utility Y tipo a la vez, sería más complejo de visualizar)
+    
+    # Top 10 modelos por cada tipo de carga
+    df_type = (
+        df.groupby(["ev_type", "model"])["num_vehiculos"]
+        .sum()
+        .reset_index()
+    )
+    
+    df_type_final = (
+        df_type.groupby("ev_type")
+        .apply(lambda x: x.nlargest(10, "num_vehiculos"))
+        .reset_index(drop=True)
+    )
+
+    plt.figure(figsize=(12, 8))
+    sns.barplot(
+        data=df_type_final,
+        x="num_vehiculos",
+        y="model",
+        hue="ev_type",
+        dodge=False,
+    )
+    plt.title("Top Modelos por Tipo de Carga (BEV vs PHEV)")
+    plt.xlabel("Nº Vehículos")
+    plt.ylabel("Modelo")
+    plt.legend(title="EV Type")
+    save_plot("q7_modelos_ev_type.png")
 
 
 # ===========================
@@ -423,6 +458,7 @@ def main():
     plot_q4()
     plot_q5()
     plot_q6()
+    plot_q7()
     plot_q8()
     plot_q9()
     plot_q10()

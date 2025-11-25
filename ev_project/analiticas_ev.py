@@ -186,7 +186,7 @@ def main():
         q3.show(50, truncate=False)
 
         # Guardar resultado
-        q3.write.mode("overwrite").parquet(f"{base_out}/q3_autonomia_vs_anio_v2")
+        q3.write.mode("overwrite").parquet(f"{base_out}/q3_autonomia_vs_anio")
 
     except Exception as e:
         print("\n*** ERROR en Q3 ***", flush=True)
@@ -243,15 +243,15 @@ def main():
         print(repr(e), flush=True)
 
     # ============================================================
-    # 7) Modelos por compañía eléctrica  (no por año -> df)
+    # 7) Modelos por compañía eléctrica y tipo de carga
     # ============================================================
     try:
         q7 = (
-            df.groupBy("make", "model", "electric_utility")
+            df.groupBy("make", "model", "electric_utility", "ev_type")
               .agg(count("*").alias("num_vehiculos"))
               .orderBy(desc("num_vehiculos"))
         )
-        print("\n--- Q7: Modelos por compañía eléctrica ---", flush=True)
+        print("\n--- Q7: Modelos por compañía eléctrica y tipo de carga ---", flush=True)
         q7.show(20, truncate=False)
         q7.write.mode("overwrite").parquet(f"{base_out}/q7_modelos_por_utility")
     except Exception as e:
