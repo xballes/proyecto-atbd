@@ -80,11 +80,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies and Run Visualization
-        run: |
-          pip install pandas seaborn matplotlib pyarrow fastparquet
-          python ev_project/visualizacion.py
-
       - name: Commit and push results
         run: |
           git config --global user.name "GitHub Actions"
