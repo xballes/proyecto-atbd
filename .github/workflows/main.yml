@@ -85,11 +85,6 @@ jobs:
           pip install pandas seaborn matplotlib plotly pyarrow
           pip install --upgrade kaleido
 
-      - name: Run visualization script
-        run: |
-          cd ev_project
-          python visualizacion.py
-
       - name: Commit and push results
         run: |
           git config --global user.name "GitHub Actions"
