@@ -186,7 +186,7 @@ def main():
         q3.show(50, truncate=False)
 
         # Guardar resultado
-        q3.write.mode("overwrite").parquet(f"{base_out}/q3_autonomia_vs_anio")
+        q3.write.mode("overwrite").parquet(f"{base_out}/q3_autonomia_vs_anio_v2")
 
     except Exception as e:
         print("\n*** ERROR en Q3 ***", flush=True)
