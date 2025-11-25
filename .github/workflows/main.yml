@@ -75,12 +75,22 @@ jobs:
           mkdir -p results
           docker cp client:/home/hadoop/results ./results
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies and Run Visualization
+        run: |
+          pip install pandas seaborn matplotlib pyarrow fastparquet
+          python ev_project/visualizacion.py
+
       - name: Commit and push results
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add results/
-          git commit -m "Add analysis results" || echo "No changes to commit"
+          git commit -m "Add analysis results and plots" || echo "No changes to commit"
           git push
 
       - name: Stop services

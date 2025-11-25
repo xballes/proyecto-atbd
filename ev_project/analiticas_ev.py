@@ -3,7 +3,6 @@ from pyspark.sql.functions import (
     col, count, avg, desc, when, max as Fmax, sum as Fsum
 )
 
-
 def main():
     spark = (
         SparkSession.builder
@@ -103,17 +102,59 @@ def main():
     # 1) Marcas líderes por estado y año  (usa df_filtrado)
     # ============================================================
     try:
+        # ================================
+        # 1) Q1 BASE: Conteo por estado, año y marca
+        # ================================
         q1 = (
             df_filtrado.groupBy("state", "model_year", "make")
-              .agg(count("*").alias("num_vehiculos"))
-              .orderBy("state", "model_year", desc("num_vehiculos"))
+                .agg(count("*").alias("num_vehiculos"))
+                .orderBy("state", "model_year", desc("num_vehiculos"))
         )
-        print("\n--- Q1: Marcas líderes por estado y año ---", flush=True)
-        q1.show(20, truncate=False)
+
+        print("\n--- Q1: Marcas líderes por estado y año ---\n", flush=True)
+        q1.show(50, truncate=False)
+
         q1.write.mode("overwrite").parquet(f"{base_out}/q1_marcas_estado_anio")
+
+        # ================================
+        # 2) Determinar los 3 estados con más coches
+        # ================================
+        estados_top = (
+            df_filtrado.groupBy("state")
+                .agg(count("*").alias("total_state"))
+                .orderBy(desc("total_state"))
+                .limit(3)
+        )
+
+        print("\n--- TOP 3 estados con más vehículos ---\n", flush=True)
+        estados_top.show()
+
+        estados_lista = [row["state"] for row in estados_top.collect()]
+
+        # ================================
+        # 3) Extraer líderes por cada uno de esos estados
+        # ================================
+        for est in estados_lista:
+            print(f"\n==== Estado: {est} ====\n")
+
+            lideres_estado = (
+                q1.where(col("state") == est)
+                .groupBy("make")
+                .agg(sum("num_vehiculos").alias("total_make"))
+                .orderBy(desc("total_make"))
+            )
+
+            lideres_estado.show(10, truncate=False)
+
+            # Guardado individual por estado
+            lideres_estado.write.mode("overwrite").parquet(
+                f"{base_out}/q1_marcas_lideres_{est}"
+            )
+
     except Exception as e:
         print("\n*** ERROR en Q1 ***", flush=True)
         print(repr(e), flush=True)
+
 
     # ============================================================
     # 2) Evolución anual BEV vs PHEV  (usa df_filtrado)
@@ -136,13 +177,17 @@ def main():
     # ============================================================
     try:
         q3 = (
-            df_filtrado.groupBy("model_year")
-              .agg(avg("electric_range").alias("autonomia_media"))
-              .orderBy("model_year")
+            df_filtrado.groupBy("model_year", "ev_type")
+                    .agg(avg("electric_range").alias("autonomia_media"))
+                    .orderBy("model_year", "ev_type")
         )
-        print("\n--- Q3: Autonomía media por año de modelo ---", flush=True)
-        q3.show(20, truncate=False)
+
+        print("\n--- Q3: Autonomía media por año y tipo de vehículo ---", flush=True)
+        q3.show(50, truncate=False)
+
+        # Guardar resultado
         q3.write.mode("overwrite").parquet(f"{base_out}/q3_autonomia_vs_anio")
+
     except Exception as e:
         print("\n*** ERROR en Q3 ***", flush=True)
         print(repr(e), flush=True)
