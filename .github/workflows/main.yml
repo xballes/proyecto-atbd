@@ -72,8 +72,7 @@ jobs:
 
       - name: Copy results to host
         run: |
-          mkdir -p results
-          docker cp client:/home/hadoop/results ./results
+          docker cp client:/home/hadoop/results ./
 
       - name: Set up Python
         uses: actions/setup-python@v4
