@@ -72,13 +72,23 @@ El script Python se encuentra en:
 docker exec -it client bash
 ```
 2. Ejecutar el script con Spark sobre YARN
-Ejecución estándar
+Ejecución estándar (client)
 ```bash
 cd /home/hadoop/ev_project
 
 spark-submit \
   --master yarn \
   --deploy-mode client \
+  analiticas_ev.py
+```
+
+Ejecución estándar (cluster)
+```bash
+cd /home/hadoop/ev_project
+
+spark-submit \
+  --master yarn \
+  --deploy-mode cluster \
   analiticas_ev.py
 ```
 Nota: El modo client es el que finaliza correctamente en este entorno Docker debido a límites de memoria de YARN en cluster mode.
