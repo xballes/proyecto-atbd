@@ -1,7 +1,12 @@
 name: Docker Compose CI
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:        
+  push:
+    branches:
+      - main               
+    paths:
+      - .github/workflows/main.yml
 
 permissions:
   contents: write
@@ -113,8 +118,9 @@ jobs:
           APP_ID=$(docker exec client yarn application -list -appStates FINISHED | awk '/application_/ {print $1}' | tail -n 1)
           echo "Detected APP_ID: $APP_ID"
           mkdir -p results/yarn_ui
-          curl -s "http://localhost:8088/cluster/app/$APP_ID" > ../results/yarn_ui/app_${APP_ID}.html
-          curl -s "http://localhost:8088/cluster/apps" > ../results/yarn_ui/apps_list.html
+          curl -s "http://localhost:8088/cluster/app/$APP_ID" > results/yarn_ui/app_${APP_ID}.html
+          curl -s "http://localhost:8088/cluster/apps" > results/yarn_ui/apps_list.html
+
 
       # ============================
       # VISUALIZACIÓN
