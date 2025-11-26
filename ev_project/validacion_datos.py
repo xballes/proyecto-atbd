@@ -9,7 +9,7 @@ from great_expectations.render.view import DefaultJinjaPageView
 # 1) Cargar dataset
 # ============================
 
-DATA_PATH = Path("./ev_project/Electric_Vehicle_Population_Data.csv")
+DATA_PATH = Path("./Electric_Vehicle_Population_Data.csv")
 df = pd.read_csv(DATA_PATH)
 
 print(f"Filas cargadas: {len(df)}")
@@ -141,7 +141,7 @@ renderer = ValidationResultsPageRenderer()
 document = renderer.render(result)
 html = DefaultJinjaPageView().render(document)
 
-output_dir = Path("results/validation")
+output_dir = Path("../results/validation")
 output_dir.mkdir(parents=True, exist_ok=True)
 output_file = output_dir / "validacion_datos.html"
 
