@@ -101,6 +101,22 @@ jobs:
             fi
           "
 
+      - name: Get containers per worker (workers_used.txt)
+        run: |
+          docker exec client bash -c '
+            APP_ID=$(yarn application -list -appStates FINISHED | awk "/application_/ {print \$1}" | tail -n 1)
+            echo "Detected APP_ID: $APP_ID"
+
+            mkdir -p /home/hadoop/results
+
+            {
+              echo "Application: $APP_ID"
+              echo
+              echo "=== Containers for this application (check Node-Id column) ==="
+              yarn container -list -appId "$APP_ID"
+            } > /home/hadoop/results/workers_used.txt 2>&1
+          '
+          
       - name: Extract Spark results from HDFS
         run: |
           docker exec client hdfs dfs -get /results/ev /home/hadoop/results
