@@ -113,9 +113,10 @@ jobs:
               echo "Application: $APP_ID"
               echo
               echo "=== Containers for this application (check Node-Id column) ==="
-              yarn container -list -appId "$APP_ID"
+              yarn container -list -appId "$APP_ID" || echo "yarn container -list failed"
             } > /home/hadoop/results/workers_used.txt 2>&1
           '
+
           
       - name: Extract Spark results from HDFS
         run: |
