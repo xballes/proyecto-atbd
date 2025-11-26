@@ -145,6 +145,27 @@ jobs:
         env:
           APP_ID: ${{ steps.get-app-id.outputs.app_id }}
 
+
+      - name: Capture HDFS NameNode UI
+        run: |
+          mkdir -p results/ui
+          node << 'EOF'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            const url = "http://localhost:9870";
+            await page.goto(url, { waitUntil: 'networkidle' });
+            await page.setViewportSize({ width: 1280, height: 720 });
+            await page.screenshot({
+              path: `results/ui/namenode_9870.png`,
+              fullPage: true
+            });
+            await browser.close();
+          })();
+          EOF
+
+
       # ============================
       # VISUALIZACIÓN
       # ============================
