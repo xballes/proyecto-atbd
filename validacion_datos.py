@@ -19,7 +19,7 @@ print(df.dtypes)
 gdf = PandasDataset(df)
 
 # ============================
-# 2) EXPECTATIONS
+# 2) REGLAS DE VALIDACIÓN
 # ============================
 
 gdf.expect_table_row_count_to_be_between(100_000, 200_000)
@@ -147,5 +147,6 @@ output_file = output_dir / "validacion_datos.html"
 
 with open(output_file, "w", encoding="utf-8") as f:
     f.write(html)
+
 
 print(f"\nInforme generado en: {output_file}")
