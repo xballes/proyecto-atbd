@@ -10,10 +10,13 @@ El objetivo es desplegar un **clúster Hadoop + YARN + Spark** sobre Docker y re
 El análisis se centra en la **adopción de vehículos eléctricos (EV)** en EE. UU., estudiando su evolución, marcas líderes y características técnicas.
 
 ---
-
 ## Estructura del proyecto
-
-
+- **docker-compose.yml**: levanta el clúster Hadoop + YARN + Spark + contenedor `client`.
+- **ev_project/analiticas_ev.py**: ejecuta las consultas Q1–Q10 en Spark, leyendo el CSV desde HDFS y guardando los resultados en `/results/ev` (HDFS).
+- **ev_project/visualizacion.py**: lee los Parquet descargados a `results/ev` y genera gráficos en `results/plots/`.
+- **ev_project/validacion_datos.py**: valida el CSV original con Great Expectations y genera `results/validation/validacion_datos.html`.
+- **ev_project/Electric_Vehicle_Population_Data.csv**: dataset original.
+- **.github/workflows/main.yaml**: orquesta todo el pipeline en GitHub Actions (validación, analíticas, extracción de resultados, visualización y commit de `results/`).
 ---
 
 ## Infraestructura desplegada
@@ -72,16 +75,6 @@ El script Python se encuentra en:
 docker exec -it client bash
 ```
 2. Ejecutar el script con Spark sobre YARN
-Ejecución estándar (client)
-```bash
-cd /home/hadoop/ev_project
-
-spark-submit \
-  --master yarn \
-  --deploy-mode client \
-  analiticas_ev.py
-```
-
 Ejecución estándar (cluster)
 ```bash
 cd /home/hadoop/ev_project
@@ -91,7 +84,6 @@ spark-submit \
   --deploy-mode cluster \
   analiticas_ev.py
 ```
-Nota: El modo client es el que finaliza correctamente en este entorno Docker debido a límites de memoria de YARN en cluster mode.
 
 ## Diferencia entre *client mode* y *cluster mode*
 
@@ -100,28 +92,6 @@ Nota: El modo client es el que finaliza correctamente en este entorno Docker deb
 | client  | En el contenedor `client`                | En la consola del usuario       | Ideal para desarrollo y debugging |
 | cluster | En un nodo YARN (`worker1/2/3`)          | UI de YARN / `yarn logs`        | Ideal para producción             |
 
-**En este proyecto:**
-
-- **client mode** funciona correctamente.  
-- **cluster mode** falla con *Exit code 137* porque el ApplicationMaster (Driver en cluster mode) se queda sin memoria dentro del contenedor YARN.
-
-### Ejecución alternativa en *cluster mode* (memoria ajustada)
-
-Para poder ejecutar el job también en **cluster mode** dentro de este entorno Docker (con recursos limitados), se puede reducir explícitamente la memoria solicitada por el driver y los ejecutores:
-
-```bash
-cd /home/hadoop/ev_project
-
-spark-submit \
-  --master yarn \
-  --deploy-mode cluster \
-  --num-executors 1 \
-  --executor-cores 1 \
-  --executor-memory 512m \
-  --driver-memory 512m \
-  --conf spark.executor.memoryOverhead=256 \
-  analiticas_ev.py
-```
 
 ### Acceso a los resultados generados
 
@@ -154,7 +124,7 @@ hdfs dfs -ls /results/ev/q1_marcas_estado_anio
 ### Copiar resultados
 ```bash
 docker exec client hdfs dfs -get /results/ev /home/hadoop/results
-docker cp client:/home/hadoop/results ./results
+docker cp client:/home/hadoop/results ./
 ```
 
 ### Resultados
