@@ -106,7 +106,7 @@ jobs:
 
       - name: Copy Spark results to host
         run: |
-          docker cp client:/home/hadoop/results ./results/
+          docker cp client:/home/hadoop/results ./
 
       # ============================
       # VISUALIZACIÓN
