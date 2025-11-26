@@ -30,6 +30,10 @@ jobs:
       # VALIDACIÓN ANTES DE SPARK
       # ============================
 
+      - name: Clean previous ALL results (validation step)
+        run: |
+          rm -rf results
+
       - name: Set up Python for validation
         uses: actions/setup-python@v4
         with:
@@ -58,9 +62,9 @@ jobs:
       - name: Upload dataset to HDFS
         run: docker exec client hdfs dfs -put -f /home/hadoop/Electric_Vehicle_Population_Data.csv /data/ev/
 
-      - name: Clean previous HDFS results
+      - name: Clean previous HDFS Spark results
         run: |
-          docker exec client hdfs dfs -rm -r -skipTrash /results/ev || echo "HDFS results directory not found, skipping removal."
+          docker exec client hdfs dfs -rm -r -skipTrash /results/ev || echo "No previous HDFS ev results."
 
       - name: Run Spark Analysis
         run: |
@@ -86,23 +90,23 @@ jobs:
               yarn application -status \$APP_ID >> /home/hadoop/results/cluster_report.txt
 
               echo -e \"\n=== Logs for \$APP_ID ===\" >> /home/hadoop/results/cluster_report.txt
-              yarn logs -applicationId \$APP_ID >> /home/hadoop/results/cluster_report.txt 2>&1 || echo 'Logs not available (aggregation might be disabled)' >> /home/hadoop/results/cluster_report.txt
+              yarn logs -applicationId \$APP_ID >> /home/hadoop/results/cluster_report.txt 2>&1 || echo 'Logs not available.' >> /home/hadoop/results/cluster_report.txt
             else
               echo -e \"\nNo finished applications found.\" >> /home/hadoop/results/cluster_report.txt
             fi
           "
 
-      - name: Extract results from HDFS
+      - name: Extract Spark results from HDFS
         run: |
           docker exec client hdfs dfs -get /results/ev /home/hadoop/results
 
-      - name: Clean previous results
+      - name: Clean previous Spark results (only ev and cluster logs)
         run: |
-          rm -rf results
+          rm -rf results/ev results/cluster_report.txt || true
 
-      - name: Copy results to host
+      - name: Copy Spark results to host
         run: |
-          docker cp client:/home/hadoop/results ./
+          docker cp client:/home/hadoop/results ./results/
 
       # ============================
       # VISUALIZACIÓN
@@ -119,6 +123,10 @@ jobs:
           pip install pandas seaborn matplotlib plotly pyarrow
           pip install --upgrade kaleido
 
+      - name: Clean previous visualization results (only plots)
+        run: |
+          rm -rf results/plots || true
+
       - name: Run visualization script
         run: |
           cd ev_project
@@ -133,7 +141,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add results/
-          git commit -m "Add analysis results and validation report" || echo "No changes to commit"
+          git commit -m "Add analysis results" || echo "No changes to commit"
           git push
 
       - name: Stop services
