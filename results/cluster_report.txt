@@ -1,32 +1,32 @@
 === YARN Node List ===
 Total Nodes:3
          Node-Id	     Node-State	Node-Http-Address	Number-of-Running-Containers
-   worker3:38695	        RUNNING	     worker3:8042	                           0
-   worker1:40831	        RUNNING	     worker1:8042	                           0
-   worker2:42393	        RUNNING	     worker2:8042	                           0
+   worker2:40469	        RUNNING	     worker2:8042	                           0
+   worker3:38467	        RUNNING	     worker3:8042	                           0
+   worker1:38181	        RUNNING	     worker1:8042	                           0
 
 === YARN Applications ===
 Total number of applications (application-types: [], states: [FINISHED] and tags: []):1
                 Application-Id	    Application-Name	    Application-Type	      User	     Queue	             State	       Final-State	       Progress	                       Tracking-URL
-application_1764168614634_0001	    analiticas_ev.py	               SPARK	    hadoop	   default	          FINISHED	         SUCCEEDED	           100%	                                N/A
+application_1764169178046_0001	    analiticas_ev.py	               SPARK	    hadoop	   default	          FINISHED	         SUCCEEDED	           100%	                                N/A
 
-=== Status for application_1764168614634_0001 ===
+=== Status for application_1764169178046_0001 ===
 Application Report : 
-	Application-Id : application_1764168614634_0001
+	Application-Id : application_1764169178046_0001
 	Application-Name : analiticas_ev.py
 	Application-Type : SPARK
 	User : hadoop
 	Queue : default
 	Application Priority : 0
-	Start-Time : 1764168671045
-	Finish-Time : 1764168754765
+	Start-Time : 1764169237673
+	Finish-Time : 1764169318313
 	Progress : 100%
 	State : FINISHED
 	Final-State : SUCCEEDED
 	Tracking-URL : N/A
-	RPC Port : 43441
+	RPC Port : 40147
 	AM Host : worker2
-	Aggregate Resource Allocation : 465228 MB-seconds, 226 vcore-seconds
+	Aggregate Resource Allocation : 449989 MB-seconds, 218 vcore-seconds
 	Aggregate Resource Preempted : 0 MB-seconds, 0 vcore-seconds
 	Log Aggregation Status : DISABLED
 	Diagnostics : 
@@ -36,12 +36,12 @@ Application Report :
 	TimeoutType : LIFETIME	ExpiryTime : UNLIMITED	RemainingTime : -1seconds
 
 
-=== Logs for application_1764168614634_0001 ===
+=== Logs for application_1764169178046_0001 ===
 WARNING: YARN_CONF_DIR has been replaced by HADOOP_CONF_DIR. Using value of YARN_CONF_DIR.
-2025-11-26 14:52:42,948 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at master/172.18.0.4:8032
-File /tmp/logs/hadoop/logs-tfile/application_1764168614634_0001 does not exist.
-File /tmp/logs/hadoop/bucket-logs-tfile/0001/application_1764168614634_0001 does not exist.
+2025-11-26 15:02:06,839 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at master/172.18.0.3:8032
+File /tmp/logs/hadoop/logs-tfile/application_1764169178046_0001 does not exist.
+File /tmp/logs/hadoop/bucket-logs-tfile/0001/application_1764169178046_0001 does not exist.
 
-Can not find any log file matching the pattern: [ALL] for the application: application_1764168614634_0001
-Can not find the logs for the application: application_1764168614634_0001 with the appOwner: hadoop
+Can not find any log file matching the pattern: [ALL] for the application: application_1764169178046_0001
+Can not find the logs for the application: application_1764169178046_0001 with the appOwner: hadoop
 Logs not available.
